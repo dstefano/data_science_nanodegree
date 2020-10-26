@@ -1,0 +1,567 @@
+---
+title: Análise de Vinhos Brancos, por Priscila De-Stefano
+---
+O presente trabalho apresenta uma Análise Exploratória de Dados de um conjunto de dados, composto por tipos de vinho branco e suas propriedades químicas.
+O objetivo deste trabalho é responder a seguinte pergunta:  
+**Quais propriedades químicas influenciam a qualidade dos vinhos brancos?**
+
+Sumário:  
+1   Análise Univariada  
+1.1 Resumo do Dataset  
+1.2 Descrição das Variáveis  
+1.3 Observações  
+1.4 Insights Interessantes  
+1.5 Criação de Variáveis Auxiliares  
+1.6 Seção de Gráficos Univariados  
+1.7 Análise Univariada - Perguntas  
+2   Análise Bivariada  
+2.1 Limpeza dos Dados  
+2.2 Analisando o Relacionamento entre Variáveis  
+2.3 Análise de Correlações de Interesse  
+2.4 Seção de Gráficos Bivariados  
+2.5 Analisando o Relacionamento entre as demais Variáveis  
+2.6 Insights Interessantes  
+2.7 Análise Bivariada - Perguntas  
+3   Análise Multivariada  
+3.1 Tranformação dos Dados e Criação de Variáveis  
+3.2 Seção de Gráficos Multivariados  
+3.3 Análise Multivariada - Perguntas  
+4   Gráficos Finais e Sumário  
+4.1 Primeiro Gráfico  
+4.2 Descrição do Primeiro Gráfico  
+4.3 Segundo Gráfico  
+4.4 Descriçnao do Segundo Gráfico  
+4.5 Terceiro Gráfico  
+4.6 Descrição do Terceiro Gráfico  
+5   Reflexão  
+    Referências Utilizadas
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Carregue aqui todos os pacotes utilizados 
+# na sua análise realizada neste arquivo fonte.
+
+# Note que o parâmetro "echo" foi definido como FALSE neste código.
+# Isso previne que o código apresente resultados formatados em HTML.
+# Você deve definir echo=FALSE para todos os blocos de código no seu arquivo.
+# install.packages('gridExtra')
+# install.packages('GGally')
+# install.packages('dplyr')
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(lattice)
+library(GGally)
+library(dplyr)
+```
+
+
+```{r echo=FALSE, Load_the_Data}
+# Carregamento dos dados
+wineQualityWhites <- read.csv('wineQualityWhites.csv')
+```
+## 1 Análise Univariada
+### 1.1 Resumo do Dataset
+```{r echo=FALSE, Data_Summary}
+# resumo do dataset
+summary(wineQualityWhites)
+head(wineQualityWhites)
+```
+
+### 1.2 Descrição das variáveis:
+   **Fixed.acidity:**   
+   Maioria dos ácidos envolvidos com vinho ou fixos ou não voláteis (não evaporam prontamente).
+   
+  **Volatile.acidity:**  
+  Quantidade de ácido acético no vinho, que em níveis muito altos pode levar a um gosto desagradável de vinagre.
+  
+  **Citric.acid:**  
+  Encontrado em pequenas quantidades, o ácido cítrico pode adicionar "frescor" e sabor aos vinhos. 
+  
+  **Residual.sugar:**  
+  Quantidade de açúcar restante após a fermentação parar. É raro encontrar vinhos com menos de 1 grama/litro e vinhos com mais de 45 gramas/litro são considerados doces.
+  
+   **Chlorides:**  
+   Quantidade de sal no vinho. 
+   
+   **Free.sulfur.dioxide:**  
+   Forma livre de SO2, existe em equilíbrio entre o SO2 molecular (como gás dissolvido) e o íon bissulfito. Impede o crescimento microbiano e a oxidação do vinho.  
+   
+   **Total.sulfur.dioxide:**  
+   Quantidade de formas livres e combinadas de S02; em baixas concentrações, o SO2 é quase indetectável no vinho, mas nas concentrações de SO2 livre acima de 50 ppm, o SO2 se torna evidente no nariz e no sabor do vinho.  
+   
+   **Density:**  
+   A densidade é próxima à da água, dependendo do percentual de álcool e teor de açúcar.  
+   
+   **pH:**  
+   Descreve como o vinho é acído ou básico numa escala de 0 (muito ácido) a 14 (muito básico). A maioria dos vinhos está entre 3-4 na escala de pH.  
+   
+   **Sulphates:**  
+   Aditivo de vinho que pode contribuir para os níveis de gás de dióxido de enxofre (S02), que age como um antimicrobiano e antioxidante.  
+   
+   **Alcohol:**  
+   Teor alcoólico percentual do vinho.  
+   
+   **Quality:**  
+   Qualidade do vinho, pontuada entre 0 e 10.
+
+### 1.3 Observações:
+  Conforme é possível observar nos outputs de resumo do dataset (Data_Summary), o atributo qualidade oscila entre as notas 3 e 9, apesar de ser inicialmente um valor compreendido entre 1 e 10. Sua mediana é 6 e média 5.878. Em relação ao dioxido de enxofre livre, é possível observar que seu valor máximo é muito distante de sua mediana e média, gerando um ponto de atenção. A descrição de cada variável foi retirada do arquivo que descreve o dataset. A partir das informações nele contidas foram retirados alguns pontos de análise, descritos na seção Description_Attributes_Analysis.
+
+### 1.4 Insights interessantes:
+* Quantidade de vinhos com alto nivel de acidez volatil (acidez volatil maior ou igual a 1): **2**
+* Quantidade de vinhos com possîvel refrescancia acentuada (acido citrico menor que 0.3200):**2430**
+* Quantidade de vinhos possivelmente doces (açucar residual > 45): **1**
+* Quantidade de vinhos com nivel de açucar residual considerado raro (açucar residual menor que 1): **77**
+* Quantidade de vinhos com com nivel de sulfato de enxofre total em grande concentração (dioxido de enxofre total > 50): **4849**
+```{r echo=FALSE, Description_Attributes_Analysis}
+# quantidade de vinhos com alto nivel de acidez volatil
+table(wineQualityWhites$volatile.acidity >= 1)
+
+# quantidade de vinhos com possîvel refrescancia acentuada
+table(wineQualityWhites$citric.acid < 0.3200)
+
+# quantidade de vinhos possivelmente doces
+table(wineQualityWhites$residual.sugar > 45)
+
+# quantidade de vinhos com nivel de açucar residual considerado raro
+table(wineQualityWhites$residual.sugar < 1)
+
+# quantidade de vinhos com nivel de sulfato de enxofre total em grande concentração
+table(wineQualityWhites$total.sulfur.dioxide > 50)
+```
+A análise realizada acima foi feita a partir da descrição de cada atributo na documentação do dataset.
+Alguns filtros foram aplicados a fim de encontrar vinhos que possuam caracteristicas específicas, como por exemplo vinhos considerados doces, ou que tenham alta concentração de enxofre total, que influencia no paladar.
+
+
+### 1.5 Criação de variveis auxiliares:
+
+Considerando que o dioxido de enxofre no vinho será objeto de estudo deste trabalho (ver detalhes na pergunta 1.7.4), será criada a variavel bound.sulfur.dioxide, que representa o percentual de dioxido de enxofre combinado presente no vinho. Acredito que a analise desta variável possa apresentar resultados interessantes ao longo do projeto.
+
+```{r echo=FALSE, Auxiliar_Variables}
+
+wineQualityWhites$bound.sulfur.dioxide = wineQualityWhites$total.sulfur.dioxide - wineQualityWhites$free.sulfur.dioxide
+```
+### 1.6 Seção de Gráficos Univariados
+Nesta seção, são exibidos histogramas para cada variável do conjunto.
+```{r echo=FALSE, Histogram_Univariate_Plots}
+
+# histograma da variável "açucar residual"
+hist1 <- qplot(x = residual.sugar, data = wineQualityWhites)  
+# histograma da variável "densidade"
+hist2 <- qplot(x = density, data = wineQualityWhites)  
+# histograma da variável "qualidade"
+hist3 <- qplot(x = quality, data = wineQualityWhites) +
+  scale_x_continuous(limits = c(0,10), breaks = seq(0,10,1))
+# histograma da variável "acidez fixa"
+hist4 <- qplot(x = fixed.acidity, data = wineQualityWhites) # ignorar valores muito distantes na distribuicao normal.
+# histograma da variável "cloridos"
+hist5 <- qplot(x = chlorides, data = wineQualityWhites)  
+# histograma da variável "pH"
+hist6 <- qplot(x = pH, data = wineQualityWhites) 
+# histograma da variável "acidez volatil"
+hist7 <- qplot(x = volatile.acidity, data = wineQualityWhites) # ignorar valores muito distantes na distribuicao normal.
+# histograma da variável "dioxido de enxofre"
+hist8 <- qplot(x = free.sulfur.dioxide, data = wineQualityWhites) 
+# histograma da variável "sulfatos"
+hist9 <- qplot(x = sulphates, data = wineQualityWhites) 
+# histograma da variável "acido citrico"
+hist10 <- qplot(x = citric.acid, data = wineQualityWhites) 
+# histograma da variável "dioxido de enxofre total"
+hist11 <- qplot(x = total.sulfur.dioxide, data = wineQualityWhites) 
+
+# histograma da variável "dioxido de enxofre combinado"
+hist12 <- qplot(x = bound.sulfur.dioxide, data = wineQualityWhites) 
+# histograma da variável "alcool"
+hist13 <- qplot(x = alcohol, data = wineQualityWhites) 
+
+# organiza histogramas, facilitando a visualização
+grid.arrange(hist1, hist2, hist3, hist4, hist5, hist6, hist7, hist8, hist9, hist10, hist11, hist12, hist13)
+```
+
+### 1.7 Análise Univariada - Perguntas
+
+### 1.7.1 Qual é a estrutura do conjunto de dados?
+
+0 conjunto de dados é estruturado em 12 variáveis, sendo cada uma destas uma caracteristica do vinho analisado.
+As colunas são estas: acidez fixa, acidez volátil, ácido cítrico, açúcar residual, cloretos, 
+dióxido de enxofre livre, total de enxofre livre, densidade, pH,  sulfatos, alcool, qualidade, sendo esta última a nota atribuída ao vinho. O conjunto de dados possui 4898 amostras.
+
+
+### 1.7.2 Quais são os principais atributos de interesse deste conjunto de dados?
+
+O principal atributo de interesse é a variável qualidade.
+Com o objetivo de garantir uma boa qualidade este projeto, realizei uma pesquisa sobre qualidade de vinhos na internet. 
+Considerando a pesquisa realizada, acredito que alguns possíveis atributos de interesse sejam o alcool e a acidez do vinho, descrita nas colunas acidez fixa e acidez volátil. Segundo publicação na revista Adega em maio de 2019, alcool e acidez de um vinho são considerados elementos cruciais para sua qualidade.
+Além disso, uma publicação da mesma revista em maio de 2008 alerta para os riscos na qualidade de um vinho que o dioxide de enxofre em altas quantidades pode acarretar. Por isso, acredito que variáveis relativas a SO2 também representam atributos de interesse.
+
+Referência:
+https://revistaadega.uol.com.br/artigo/o-alcool-e-acidez-dos-vinhos_6055.html
+https://revistaadega.uol.com.br/artigo/o-papel-do-dioxido-de-enxofre-so2-nos-vinhos_8165.html
+
+### 1.7.3 Quais outros atributos você acha que podem lhe auxiliar na investigação destes atributos de interesse?
+
+Considerando que demais componentes quimicos do vinho influenciam em sua acidez e alcool, acredito em principio que todas as demais variáveis do conjunto possam auxiliar nesta investigação.
+
+### 1.7.4 Você criou novas variáveis a partir dos atributos existentes no conjunto de dados?
+
+Foi criada a variavel bound.sulfur.dioxide a partir da difereça entre as variáveis total.sulfur.dioxide e free.sulfur.dioxide.
+
+### 1.7.5 Dos atributos investigados, distribuições incomuns foram encontradas? Você aplicou operações nos dados para limpá-los, ajustá-los ou mudar a forma dos dados? Se sim, por quê?
+
+Com exceção do atributo açucar residual, os demais seguem a distribuição normal. Ainda não foram aplicadas operações de limpeza nos dados, sua necessidade será analizada na Seção de Gráficos Bivariados.
+
+
+## 2. Análise Bivariada
+
+### 2.1 Limpeza dos dados:
+
+```{r echo=FALSE, Data_Clean}
+```
+### 2.2 Alisando Relacionamento entre Variáveis:  
+Nesta seção, o relacionamento entre as variáveis de interesse será analisado através do cálculo da correlação.
+Inicialmente, foram analisadas as relações entre qualidade e acidez fixa, acidez volatil e alcool.
+Foram criados os sub-grupos de variáveis conforme abaixo:
+
+* sub-grupo 1: qualidade e acidez fixa
+* sub-grupo 2: qualidade e acidez volatil
+* sub-grupo 3: qualidade e alcool
+
+Os gráficos abaixo mostram a correlação observada em cada sub-grupo.
+```{r echo=FALSE}
+
+# Criando sub-grupos para analise da influencia da acidez e do alcool na qualidade do vinho
+
+# sub-grupo para analisar qualidade e acidez fixa
+group_quality_fixed_acidity <- wineQualityWhites %>% select(quality, fixed.acidity)
+# sub-grupo para analisar qualidade e acidez volatil
+group_quality_volatile_acidity <- wineQualityWhites %>% select(quality, volatile.acidity)
+# sub-grupo para analisar qualidade e alcool
+group_quality_alcohol <- wineQualityWhites %>% select(quality, alcohol)
+
+# Analisando relacionamentos entre qualidade e acidez fixa
+ggpairs(group_quality_fixed_acidity)
+# Analisando relacionamentos entre qualidade e acidez volatil
+ggpairs(group_quality_volatile_acidity)
+# Analisando relacionamentos entre qualidade e alcohol
+ggpairs(group_quality_alcohol)
+
+```
+
+
+Em seguida, foram analisadas as relações entre qualidade e dioxido de enxofre.
+Foram criados os sub-grupos de variáveis conforme abaixo:
+
+* sub-grupo 4: qualidade e dioxido de enxofre livre
+* sub-grupo 5: qualidade e dioxido de enxofre combinado
+* sub-grupo 6: qualidade e dioxido de enxofre total
+
+Os gráficos abaixo mostram a correlação observada em cada sub-grupo.
+```{r echo=FALSE, ggpair_Sulfur_Dioxide_Analysis}
+
+# Criando sub-grupos para analise da influencia do dioxido de enxofre na qualidade do vinho
+
+# sub-grupo para analisar qualidade e dioxido de enxofre livre
+group_quality_free_sulfur <- wineQualityWhites %>% select(quality, free.sulfur.dioxide)
+# sub-grupo para analisar qualidade e dioxido de enxofre combinado
+group_quality_bound_sulfur <- wineQualityWhites %>% select(quality, bound.sulfur.dioxide)
+# sub-grupo para analisar qualidade e dioxido de enxofre total
+group_quality_total_sulfur <- wineQualityWhites %>% select(quality, total.sulfur.dioxide)
+
+# Analisando relacionamentos entre qualidade e dioxido de enxofre livre
+ggpairs(group_quality_free_sulfur)
+# Analisando relacionamentos entre qualidade e dioxido de enxofre combinado
+ggpairs(group_quality_bound_sulfur)
+# Analisando relacionamentos entre qualidade e dioxido de enxofre total
+ggpairs(group_quality_total_sulfur)
+```
+
+### 2.3 Análise de Correlações de Interesse:
+
+Conforme é possível observar nos graficos do chunk acima, foram obtidos os seguintes valores de correlações:
+
+- qualidade e alcool: 0.436
+- qualidade e acidez volatil: -0.195
+- qualidade e acidez fixa: -0.114
+- qualidade e dioxido de enxofre livre: 0.00816
+- qualidade e dioxido de enxofre combinado: -0.218
+- qualidade e dioxido de enxofre total: -0.175
+
+A maior correlação identificada foi entre as variáveis quality e alcohol, mas ainda sim esta não pode ser considera uma correlação positiva forte.
+A correlação entre qualidade e as variaveis de acidez é negativa, o que sugere que quando a acidez aumenta, a qualidade do vinho diminui. Esta correlação também não é forte.
+Em relação as correlações entre qualidade e as variaveis de dioxido de enxofre, encontramos duas informações relevantes. 
+Primeiramente, temos como a correlação mais fraca da lista a entre a qualidade e o dioxido de enxofre livre. 
+Segundamente, de todas as variaveis de enxofre, a que possui maior correlação com a qualidade é a dioxido de enxofre combinado, variável anteriormente calculada. A correlação da qualidade com estas variáveis também é negativa, sugerindo uma piora na qualidade do vinho quando o percentual de dioxido de enxofre aumenta.
+
+Nenhuma das correlações obtidas pode ser considerada forte.
+
+### 2.4 Seção de Gráficos Bivariados
+```{r echo=FALSE, Histogram_Bivariate_Plots_1}
+
+# Histogramas qualidade x variaveis primarias de interesse
+# summary(wineQualityWhites)
+
+hist1 <- ggplot (aes(x = quality, y = alcohol), data = wineQualityWhites) +
+   geom_point() +
+  xlim(3,9) 
+# + ylim(2,14.20)
+
+hist2 <- ggplot (aes(x = quality, y = volatile.acidity), data = wineQualityWhites) +
+   geom_point() +
+  xlim(3,9) 
+# + ylim(2,14.20)
+
+hist3 <- ggplot (aes(x = quality, y = fixed.acidity), data = wineQualityWhites) +
+   geom_point() +
+  xlim(3,9) 
+# + ylim(2,14.20)
+
+hist4 <- ggplot (aes(x = quality, y = free.sulfur.dioxide), data = wineQualityWhites) +
+   geom_point() +
+  xlim(3,9) 
+# + ylim(2,14.20)
+
+hist5 <- ggplot (aes(x = quality, y = bound.sulfur.dioxide), data = wineQualityWhites) +
+   geom_point() +
+  xlim(3,9) 
+# + ylim(2,14.20)
+
+hist6 <- ggplot (aes(x = quality, y = total.sulfur.dioxide), data = wineQualityWhites) +
+   geom_point() +
+  xlim(3,9) 
+# + ylim(2,14.20)
+
+grid.arrange(hist1, hist2)
+grid.arrange(hist3, hist4)
+grid.arrange(hist5, hist6)
+```
+
+
+### 2.5 Alisando Relacionamento entre demais Variáveis
+Vamos agora, analisar o relacionamento da qualidade com as demais variáveis do cojunto, em busca de outros relacionamentos interessantes.
+
+```{r echo=FALSE, ggpair_Second_Analysis}
+
+#names(wineQualityWhites)
+# Criando sub-grupos para analise da influencia das demais variaveis na qualidade do vinho
+
+# sub-grupo para analisar qualidade e densidade
+group_quality_density <- wineQualityWhites %>% select(quality, density)
+# sub-grupo para analisar qualidade e pH
+group_quality_ph <- wineQualityWhites %>% select(quality, pH)
+# sub-grupo para analisar qualidade e sulfatos
+group_quality_sulphates <- wineQualityWhites %>% select(quality, sulphates)
+# sub-grupo para analisar qualidade e cloretos
+group_quality_chlorides <- wineQualityWhites %>% select(quality, chlorides)
+# sub-grupo para analisar qualidade e acucar residual
+group_quality_residual_sugar <- wineQualityWhites %>% select(quality, residual.sugar)
+                                                        
+
+# Analisando relacionamentos entre qualidade e densidade
+ggpairs(group_quality_density)
+# Analisando relacionamentos entre qualidade e pH
+ggpairs(group_quality_ph)
+# Analisando relacionamentos entre qualidade e sulfatos
+ggpairs(group_quality_sulphates)
+# Analisando relacionamentos entre qualidade e cloretos
+ggpairs(group_quality_chlorides)
+# Analisando relacionamentos entre qualidade e cloretos
+ggpairs(group_quality_residual_sugar)
+```
+
+Conforme é possível observar nos graficos do chunk acima, foram obtidos os seguintes valores de correlações:
+
+- qualidade e densidade: -0.307
+- qualidade e pH: 0.0994
+- qualidade sulphates: 0.0537
+- qualidade e chlorides: -0.21
+- qualidade e acucar residual: -0.0976
+
+A maior correlação identificada foi entre qualidade e densidade.
+
+### 2.6 Insights interessantes:
+  - O vinho que possui o maior percentual de dioxido de enxofre combinado possui nota 3. Considerada que este valor é o minimo valor da variavel qualidade, este vinho pode ser
+    considerado de má qualidade.
+
+### 2.7 Análise Bivariada - Perguntas
+
+### 2.7.1 Discuta sobre alguns dos relacionamentos observados nesta parte da investigação. Como os atributos de interesse variaram no conjunto de dados?
+
+O relacionamento mais interessante identificado foi entre a qualidade e o alcool. Com uma correlação média positiva, a análise sugere que vinhos com maiores percentuais de alcool
+tendem a ter uma qualidade acima média.
+Com análises de outras atributos, foi identificado que o a variável densidade também possui uma correlação positiva com a qualidade do vinho.
+Foi observado que as variaveis qualidade e acidez (fixa e volatil) são inversamente proporcionais, o que sugere que quando a acidez aumenta, a qualidade do vinho diminui. Este relacionamento foi medido pela correlação entre as variaveis, que não é classificado como forte.
+Além disso, foi observado que as variaveis qualidade e dioxido de enxofre (livre, combinado, total) também são inversamente proporcionais, sugerindo uma piora na qualidade do vinho quando o percentual de dioxido de enxofre aumenta.
+
+### 2.7.2 Você observou algum relacionamento interessante entre os outros atributos (os que não são de interesse)?
+
+Foi observado que de todas as variaveis de enxofre, a que possui relacionamento mais forte com a qualidade é a dioxido de enxofre combinado.
+Além disso, foi identificado que qualidade e densidade também possuem um relacionamento forte.
+
+### 2.7.3 Qual foi o relacionamento mais forte encontrado?
+
+Entre as variáveis qualidade e alcool.
+
+## 3 Análise Multivariada
+
+Nesta seção, serão analisadas os relacionamentos entre os atributos abaixo: qualidade, densidade, alcool e dioxido de enxofre combinado.
+Estes atributos foram os escolhidos por apresentarem relacionamento mais significativo com a qualidade do vinho, de acordo com as análises efetuadas na seção anterior.
+
+## 3.1 Transformação dos Dados e Criação de Variáveis
+
+Para realizar as análise dos atributos de interesse escolhidos, serão criadas novas variáveis, que representam versões categorizadas destes atributos.
+Os atributos criados serão utilizados conforme necessidade.
+Os atributos serão categorizados conforme abaixo:
+
+* qualidade: dividida em 3 categorias. Considerando que esta variavel possui minimo 3, maximo 9 e mediana 6, teremos as categorias RUIM (3-5), MEDIA (5-7), BOA (7-9)
+* densidade: dividida em 4 categorias, de acordo com seus quartils
+* alcool: dividida em 4 categorias, de acordo com seus quartils
+* dioxido de enxofre combinado: dividida em 4 categorias, de acordo com seus quartils
+
+```{r echo=FALSE, Multivariate_Quantile}
+# calculo de quartils
+quantile(wineQualityWhites$density)
+quantile(wineQualityWhites$alcohol)
+quantile(wineQualityWhites$bound.sulfur.dioxide)
+```
+
+* densidade: 0.9871100, 0.9917225, 0.9937400, 0.9961000, 1.0389800 
+* alcool: 8.0, 9.5, 10.4, 11.4, 14.2
+* dioxido de enxofre combinado: 4, 78, 100, 125, 331
+
+Serão criadas as variáveis density.category, alcohol.category, bound.sulfur.dioxide.category
+
+```{r echo=FALSE, Multivariate_New_Variables}
+
+wineQualityWhites$quality.category <- with(wineQualityWhites, cut(quality, breaks = c(3, 5, 7, 9),
+                  ordered = TRUE))
+
+wineQualityWhites$density.category <- with(wineQualityWhites, cut(density, breaks = c( 0.9871100,0.9917225,0.9937400,0.9961000,1.0389800),
+                  ordered = TRUE))
+
+wineQualityWhites$alcohol.category <- with(wineQualityWhites, cut(alcohol, breaks = c(8.0, 9.5, 10.4, 11.4, 14.2),
+                  ordered = TRUE))
+
+wineQualityWhites$bound.sulfur.dioxide.category <- with(wineQualityWhites, cut(bound.sulfur.dioxide, breaks = c(4, 78, 100, 125, 331),
+                  ordered = TRUE))
+```
+### 3.2 Seção de Gráficos Multivariados
+
+A seguir será feita a análise simultanea das variáveis alcool, densidade e dioxido de enxofre combinado.
+Foi omitido 1% da variável densidade e suas fronteiras para facilitar a visualização dos dados.
+```{r echo=FALSE, Multivariate_Plots_1}
+
+newdat <- wineQualityWhites[!is.na(wineQualityWhites$bound.sulfur.dioxide.category), ]
+ggplot(aes(x = alcohol, y = density), data = newdat) +
+  geom_jitter(aes(color = bound.sulfur.dioxide.category), alpha = 1/2) +
+    ylim(quantile(newdat$density, 0.01),
+       quantile(newdat$density, 0.99))
+```
+
+Conforme é possível observar not plot acima, o dioxido de enxofre combinado em grandes quantidades é identificado majoritariamente em vinhos de densidade alta
+e percentual de alcool abaixo dos 10%.  
+Vinhos com percentual acima dos 12%, considerado alto, apresentam em sua maioria uma baixa concentração de dioxido de enxofre combinado.
+
+```{r echo=FALSE, Multivariate_Plots_2}
+newdat <- wineQualityWhites[!is.na(wineQualityWhites$quality.category), ]
+ggplot(aes(x = alcohol, y = density), data = newdat) +
+  geom_jitter(aes(color = quality.category), alpha = 1/2) +
+    ylim(quantile(newdat$density, 0.01),
+       quantile(newdat$density, 0.99))
+```
+
+No gráfico acima, é possível confirmar a relação forte encontrada na seção 2 entre qualidade e alcool. É possível notar que os vinhos de qualidade considerada boa, com notas entre 7 e 9, são encontrados majoriatiamente na area do gráfico respectiva aos vinhos cujo percentual de alcool se aproxima dos 13%.
+Além disso, confirmarmos a correlação negativa entre qualidade e densidade: vinhos com qualidade considerada baixa são encontrados majoritariamente em densidades maiores que 0.992 g/cm^3.
+
+### 3.3 Análise Multivariada - Perguntas
+
+### 3.3.1 Discuta sobre os relacionamentos observados nesta parte da investigação. Quais atributos que fortaleceram os demais na observação das variáveis de interesse?
+
+Os atributos criados nesta seção para categorizar as variáveis de interesse foram extremamente importantes para fortalecer as observações realizadas anteriormente nas variáveis de interesse. Com eles, foi possível confirmar graficamente algumas das suposições levantadas na seção dois após a análise de relacionamentos.
+
+
+### 3.3.2 Interações surpreendentes e/ou interessantes foram encontradas entre os atributos?
+
+Foi interessante de perceber a relação inversa que existe entre o alcool e o dioxido de enxofre combinado, pois na presença de um percentual de alcool grande no vinho, esta variavel aparece majoritariamente em concentrações pequenas. Seria isto efeito de alguma reação química?
+
+
+## 4 Gráficos Finais e Sumário
+
+### 4.1 Primeiro Gráfico
+```{r echo=FALSE, Plot_One}
+ggpairs(group_quality_alcohol)
+ggpairs(group_quality_density)
+```
+
+### 4.2 Descrição do Primeiro Gráfico
+
+Os gráficos de correlação plotados acima representam as duas relações mais fortes com a qualidade do vinho identificadas.
+A primeira, positiva, indica que quanto maior o percentual de alcool no vinho, melhor ele tende a ser.
+A segunda, negativa, indica que quanto maior a densidade do vinho, pior tende a ser sua qualidade.
+Estes relacionamentos foram inicialmente identificados na seção 2 e estudados mais profundamente na seção 3.
+
+### 4.3 Segundo Gráfico
+```{r echo=FALSE, Plot_Two}
+newdat <- wineQualityWhites[!is.na(wineQualityWhites$bound.sulfur.dioxide.category), ]
+ggplot(aes(x = alcohol, y = density), data = newdat) +
+  geom_jitter(aes(color = bound.sulfur.dioxide.category), alpha = 1/2) +
+    ylim(quantile(newdat$density, 0.01),
+       quantile(newdat$density, 0.99)) + ggtitle("Gráfico de Interação entre Densidade, Alcool e SO2 combinado") +
+  xlab("Alcool (% por Volume)") +
+  ylab("Densidade (g / cm^3)")
+```
+
+### 4.4 Descrição do Segundo Gráfico
+
+O gráfico acima é bastante interessante, pois expressa como as principais variáveis que relacionamentos a qualidade do vinho interagem entre si.
+Foi possível observar que o dioxido de enxofre combinado em grandes quantidades é identificado majoritariamente em vinhos de densidade alta
+e percentual de alcool abaixo dos 10%.  
+Vinhos com percentual acima dos 12%, considerado alto, apresentam em sua maioria uma baixa concentração de dioxido de enxofre combinado.
+
+### 4.5 Terceiro Gráfico
+```{r echo=FALSE, Plot_Three}
+newdat <- wineQualityWhites[!is.na(wineQualityWhites$quality.category), ]
+ggplot(aes(x = alcohol, y = density), data = newdat) +
+  geom_jitter(aes(color = quality.category), alpha = 1/2) +
+    ylim(quantile(newdat$density, 0.01),
+       quantile(newdat$density, 0.99)) + ggtitle("Gráfico de Interação entre Qualidade, Densidade e Alcool") +
+  xlab("Alcool (% por Volume)") +
+  ylab("Densidade (g / cm^3)")
+``` 
+
+### 4.6 Descrição do Terceiro Gráfico
+
+O gráfico acima confirma a relação forte encontrada na seção 2 entre qualidade e alcool. É possível notar que os vinhos de qualidade considerada boa, com notas entre 7 e 9, são encontrados majoriatiamente na area do gráfico respectiva aos vinhos cujo percentual de alcool se aproxima dos 13%.
+Além disso, confirmarmos a correlação negativa entre qualidade e densidade: vinhos com qualidade considerada baixa são encontrados majoritariamente em densidades maiores que 0.992 g/cm^3.
+
+## 5 Reflexão
+
+Inicialmente, foram observadas características de cada variável do conjunto separadamente, a fim de identificar insights através de consultas iniciais nos dados.
+A partir disso e considerando uma rápida pesquisada sobre vinhos realizada, as variáveis respectivas a alcool, acidez e dioxido de enxofre foram selecionadas como de interesse, para uma análise mais aprofundada na seção 2.
+
+Em seguida, a relação dessas variáveis com a qualidade do vinho foi avaliada, onde foram encontradas correlações positivas e negativas. Além disso, em análises auxiliares a variável densidade também se tornou uma variável de interesse.
+
+Na seção 3, decidi aprofundar a análise nas variáveis alcool, densidade e dioxido de enxofre combinado, criando a partir delas variáveis que categorizavam os dados. Estas variáveis foram extremamente importantes, pois embasaram as suposições levantadas na seção 2, possibilitando um bom entendimento do que esta por trás da qualidade de um vinho.
+
+O projeto de Análise Exploratória de Dados foi extremamente desafiador, mas acredito que a pergunta-chave proposta pode ser respondida com êxito.
+Mesmo conhecendo pouco sobre vinhos, tive a oportunidade de compreender como as propriedades químicas do vinho influenciam sua qualidade a partir
+do conjunto de dados analisado. Foi uma experiência bastante gratificante e que me inspirou a futuramente realizar um EDA de dados dos quais possua mais conhecimento prévio, como por exemplo o setor financeiro.
+
+## Referências Utilizadas
+https://revistaadega.uol.com.br/artigo/o-alcool-e-acidez-dos-vinhos_6055.html  
+
+https://revistaadega.uol.com.br/artigo/o-papel-do-dioxido-de-enxofre-so2-nos-vinhos_8165.html  
+
+https://medium.com/@purnasaigudikandula/exploratory-data-analysis-beginner-univariate-bivariate-and-multivariate-habberman-dataset-2365264b751  
+
+http://www.sthda.com/english/wiki/ggally-r-package-extension-to-ggplot2-for-correlation-matrix-and-survival-plots-r-software-and-data-visualization#ggpairs-ggplot2-matrix-of-plots  
+
+https://stackoverflow.com/questions/10085806/extracting-specific-columns-from-a-data-frame  
+
+https://www.rdocumentation.org/packages/GGally/versions/1.4.0/topics/ggpairs  
+
+http://www.dmstat1.com/res/TheCorrelationCoefficientDefined.html  
+
+http://www.sthda.com/english/wiki/ggplot2-title-main-axis-and-legend-titles
+
+
+
+
